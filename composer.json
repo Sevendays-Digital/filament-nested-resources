@@ -1,17 +1,17 @@
 {
-    "name": ":vendor_slug/:package_slug",
-    "description": ":package_description",
+    "name": "sevendays-digital/filament-nested-resources",
+    "description": "Helpers to work with nested resources",
     "keywords": [
-        ":vendor_name",
+        "Sevendays-Digital",
         "laravel",
-        ":package_slug"
+        "filament-nested-resources"
     ],
-    "homepage": "https://github.com/:vendor_slug/:package_slug",
+    "homepage": "https://github.com/sevendays-digital/filament-nested-resources",
     "license": "MIT",
     "authors": [
         {
-            "name": ":author_name",
-            "email": "author@domain.com",
+            "name": "Harings Rob",
+            "email": "haringsrob@gmail.com",
             "role": "Developer"
         }
     ],
@@ -38,13 +38,13 @@
     },
     "autoload": {
         "psr-4": {
-            "VendorName\\Skeleton\\": "src",
-            "VendorName\\Skeleton\\Database\\Factories\\": "database/factories"
+            "SevendaysDigital\\FilamentNestedResources\\": "src",
+            "SevendaysDigital\\FilamentNestedResources\\Database\\Factories\\": "database/factories"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "VendorName\\Skeleton\\Tests\\": "tests"
+            "SevendaysDigital\\FilamentNestedResources\\Tests\\": "tests"
         }
     },
     "scripts": {
@@ -67,10 +67,10 @@
     "extra": {
         "laravel": {
             "providers": [
-                "VendorName\\Skeleton\\SkeletonServiceProvider"
+                "SevendaysDigital\\FilamentNestedResources\\FilamentNestedResourcesServiceProvider"
             ],
             "aliases": {
-                "Skeleton": "VendorName\\Skeleton\\Facades\\Skeleton"
+                "FilamentNestedResources": "SevendaysDigital\\FilamentNestedResources\\Facades\\FilamentNestedResources"
             }
         }
     },

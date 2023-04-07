@@ -1,13 +1,13 @@
 <?php
 
-namespace VendorName\Skeleton;
+namespace SevendaysDigital\FilamentNestedResources;
 
 use Filament\PluginServiceProvider;
 use Spatie\LaravelPackageTools\Package;
 
-class SkeletonServiceProvider extends PluginServiceProvider
+class FilamentNestedResourcesServiceProvider extends PluginServiceProvider
 {
-    public static string $name = 'skeleton';
+    public static string $name = 'filament-nested-resources';
 
     protected array $resources = [
         // CustomResource::class,
@@ -22,15 +22,15 @@ class SkeletonServiceProvider extends PluginServiceProvider
     ];
 
     protected array $styles = [
-        'plugin-skeleton' => __DIR__.'/../resources/dist/skeleton.css',
+        'plugin-filament-nested-resources' => __DIR__.'/../resources/dist/filament-nested-resources.css',
     ];
 
     protected array $scripts = [
-        'plugin-skeleton' => __DIR__.'/../resources/dist/skeleton.js',
+        'plugin-filament-nested-resources' => __DIR__.'/../resources/dist/filament-nested-resources.js',
     ];
 
     // protected array $beforeCoreScripts = [
-    //     'plugin-skeleton' => __DIR__ . '/../resources/dist/skeleton.js',
+    //     'plugin-filament-nested-resources' => __DIR__ . '/../resources/dist/filament-nested-resources.js',
     // ];
 
     public function configurePackage(Package $package): void
