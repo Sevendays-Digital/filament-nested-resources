@@ -25,6 +25,7 @@ abstract class NestedListRecords extends ListRecords
     {
         $urlParams = array_values($this->urlParameters);
         $parameter = array_pop($urlParams)[0];
+
         return static::getResource()::getEloquentQuery($parameter);
     }
 
@@ -33,11 +34,11 @@ abstract class NestedListRecords extends ListRecords
         $resource = static::getResource();
 
         $action
-            ->authorize(fn(Model $record): bool => $resource::canEdit($record))
-            ->form(fn(): array => $this->getEditFormSchema());
+            ->authorize(fn (Model $record): bool => $resource::canEdit($record))
+            ->form(fn (): array => $this->getEditFormSchema());
 
         if ($resource::hasPage('edit')) {
-            $action->url(fn(Model $record): string => $resource::getUrl('edit',
+            $action->url(fn (Model $record): string => $resource::getUrl('edit',
                 [...$this->urlParameters, 'record' => $record]));
         }
     }
@@ -50,11 +51,10 @@ abstract class NestedListRecords extends ListRecords
             ->authorize($resource::canCreate())
             ->model($this->getModel())
             ->modelLabel($this->getModelLabel())
-            ->form(fn(): array => $this->getCreateFormSchema());
+            ->form(fn (): array => $this->getCreateFormSchema());
 
         if ($resource::hasPage('create')) {
-            $action->url(fn(): string => $resource::getUrl('create', $this->urlParameters));
+            $action->url(fn (): string => $resource::getUrl('create', $this->urlParameters));
         }
     }
-
 }

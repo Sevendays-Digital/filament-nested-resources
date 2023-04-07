@@ -13,7 +13,7 @@ abstract class NestedResource extends Resource
     protected static bool $shouldRegisterNavigation = false;
 
     /**
-     * @return Resource|NestedResource
+     * @return resource|NestedResource
      */
     abstract public static function getParent(): string;
 
@@ -36,8 +36,9 @@ abstract class NestedResource extends Resource
         $key = (new $parentModel)->getKeyName();
         $query->whereHas(
             static::getParentAccessor(),
-            fn(Builder $builder) => $builder->where($key, '=', $parent ?? static::getParentId())
+            fn (Builder $builder) => $builder->where($key, '=', $parent ?? static::getParentId())
         );
+
         return $query;
     }
 
@@ -48,11 +49,11 @@ abstract class NestedResource extends Resource
 
             $prefix = '';
             foreach (static::getParentTree(static::getParent()) as $parent) {
-                $prefix .= $parent->urlPart . '/{' . $parent->urlPlaceholder . '}/';
+                $prefix .= $parent->urlPart.'/{'.$parent->urlPlaceholder.'}/';
             }
 
             Route::name("$slug.")
-                ->prefix($prefix . $slug)
+                ->prefix($prefix.$slug)
                 ->middleware(static::getMiddlewares())
                 ->group(function () {
                     foreach (static::getPages() as $name => $page) {
@@ -81,7 +82,7 @@ abstract class NestedResource extends Resource
 
         $list = [];
         if (new $parent() instanceof NestedResource) {
-            $list = [... $list, ...static::getParentTree($parent::getParent(), $urlParams)];
+            $list = [...$list, ...static::getParentTree($parent::getParent(), $urlParams)];
         }
 
         $urlParams = static::getParentParametersForUrl($parent, $urlParams);

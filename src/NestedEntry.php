@@ -9,7 +9,7 @@ class NestedEntry
     public function __construct(
         public string $urlPlaceholder,
         public string $urlPart,
-        /** @var NestedResource|Resource $resouce */
+        /** @var NestedResource|resource $resouce */
         public string $resource,
         public string $label,
         public mixed $id,
@@ -21,6 +21,7 @@ class NestedEntry
     {
         $params = $this->urlParams;
         array_pop($params);
+
         return $this->resource::getUrl('index', $params);
     }
 
@@ -28,6 +29,7 @@ class NestedEntry
     {
         $params = $this->urlParams;
         array_pop($params);
+
         return $this->resource::getUrl('edit', [...$params, 'record' => $this->id]);
     }
 

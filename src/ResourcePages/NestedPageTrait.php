@@ -9,7 +9,7 @@ trait NestedPageTrait
 {
     protected function getBreadcrumbs(): array
     {
-        /** @var Resource|NestedResource $resource */
+        /** @var resource|NestedResource $resource */
         $resource = static::getResource();
 
         // Build the nested breadcrumbs.

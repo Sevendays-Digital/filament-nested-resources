@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Route;
 abstract class NestedEditRecord extends EditRecord
 {
     use NestedPageTrait;
+
     public mixed $urlParameters;
 
     public function mount($record): void

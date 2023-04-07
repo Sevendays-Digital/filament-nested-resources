@@ -14,7 +14,7 @@ class ChildResourceLink extends TextColumn
     private string $resourceClass;
 
     /**
-     * @param NestedResource $name
+     * @param  NestedResource  $name
      */
     public static function make(string $name): static
     {
@@ -38,6 +38,7 @@ class ChildResourceLink extends TextColumn
     public function forResource(string $resourceClass): static
     {
         $this->resourceClass = $resourceClass;
+
         return $this;
     }
 
@@ -45,7 +46,7 @@ class ChildResourceLink extends TextColumn
     {
         $count = $this->getCount();
 
-        return $count . ' ' . ($count === 1 ? $this->getChildLabelSingular() : $this->getChildLabelPlural());
+        return $count.' '.($count === 1 ? $this->getChildLabelSingular() : $this->getChildLabelPlural());
     }
 
     public function getUrl(): ?string
