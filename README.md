@@ -1,13 +1,14 @@
 # Helpers to work with nested resources
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/sevendays-digital/filament-nested-resources.svg?style=flat-square)](https://packagist.org/packages/sevendays-digital/filament-nested-resources)
-[![GitHub Tests Action Status](https://img.shields.io/github/workflow/status/sevendays-digital/filament-nested-resources/run-tests?label=tests)](https://github.com/sevendays-digital/filament-nested-resources/actions?query=workflow%3Arun-tests+branch%3Amain)
-[![GitHub Code Style Action Status](https://img.shields.io/github/workflow/status/sevendays-digital/filament-nested-resources/Check%20&%20fix%20styling?label=code%20style)](https://github.com/sevendays-digital/filament-nested-resources/actions?query=workflow%3A"Check+%26+fix+styling"+branch%3Amain)
-[![Total Downloads](https://img.shields.io/packagist/dt/sevendays-digital/filament-nested-resources.svg?style=flat-square)](https://packagist.org/packages/sevendays-digital/filament-nested-resources)
+This package adds support for nested resources in Filament.
 
+It provides the base classes and column to provide the nested structure.
 
+It currently is not that configurable and you need to follow naming conventions usually used by Laravel.
 
-This is where your description should go. Limit it to a paragraph or two. Consider adding a small example.
+Demo:
+
+https://user-images.githubusercontent.com/866743/230615762-af98d4ff-a285-4ad3-8964-bbb26b6d7a6e.mov
 
 ## Installation
 
@@ -17,40 +18,50 @@ You can install the package via composer:
 composer require sevendays-digital/filament-nested-resources
 ```
 
-You can publish and run the migrations with:
-
-```bash
-php artisan vendor:publish --tag="filament-nested-resources-migrations"
-php artisan migrate
-```
-
-You can publish the config file with:
-
-```bash
-php artisan vendor:publish --tag="filament-nested-resources-config"
-```
-
-Optionally, you can publish the views using
-
-```bash
-php artisan vendor:publish --tag="filament-nested-resources-views"
-```
-
-This is the contents of the published config file:
-
-```php
-return [
-];
-```
-
 ## Usage
 
+Currently you need to do a couple of changes to make this work. But you start of by creating a 
+[filament resource](https://filamentphp.com/docs/2.x/admin/resources/getting-started#creating-a-resource)
+(The parent resource should already exist at this point. The resource we are changing is the child one).
+
+Once you have that, you will need to change the `Filament/Resources/ChildModelResource.php` to the `NestedResource`.
+
 ```php
-$filament-nested-resources = new SevendaysDigital\FilamentNestedResources();
-echo $filament-nested-resources->echoPhrase('Hello, SevendaysDigital!');
+use SevendaysDigital\FilamentNestedResources\Columns\ChildResourceLink;
+use SevendaysDigital\FilamentNestedResources\NestedResource;
+
+class ChildModelResource extends NestedResource
+{
+    public static function getParent(): string
+    {
+        return ParentModelResource::class;
+    }
+}
+```
+
+Then for each of the following, update it to use the nested version:
+- `CreateChildModel extends CreateRecord` -> `CreateChildModel extends NestedCreateRecord`
+- `EditChildModel extends EditRecord` -> `EditChildModel extends NestedEditRecord`
+- `ListChildModel extends ListRecords` -> `CreateChildModel extends NestedListRecords`
+
+This is required because in our filament component we need to keep track of the context. I hope some day we can have
+utility in Filament to avoid this change.
+
+Finally, on your `ParentModelResource` you can add the column to provide the links:
+
+```php
+public static function table(Table $table): Table
+{
+    return $table
+        ->columns([
+            ChildResourceLink::make(ChildModelResource::class),
+        ]);
+}
 ```
 
 ## Testing
+
+There's none :).
 
 ```bash
 composer test
