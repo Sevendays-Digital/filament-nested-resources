@@ -43,7 +43,7 @@ abstract class NestedResource extends Resource
         $key = (new $parentModel())->getKeyName();
         $query->whereHas(
             static::getParentAccessor(),
-            fn(Builder $builder) => $builder->where($key, '=', $parent ?? static::getParentId())
+            fn (Builder $builder) => $builder->where($key, '=', $parent ?? static::getParentId())
         );
 
         return $query;
@@ -56,11 +56,11 @@ abstract class NestedResource extends Resource
 
             $prefix = '';
             foreach (static::getParentTree(static::getParent()) as $parent) {
-                $prefix .= $parent->urlPart . '/{' . $parent->urlPlaceholder . '}/';
+                $prefix .= $parent->urlPart.'/{'.$parent->urlPlaceholder.'}/';
             }
 
             Route::name("$slug.")
-                ->prefix($prefix . $slug)
+                ->prefix($prefix.$slug)
                 ->middleware(static::getMiddlewares())
                 ->group(function () {
                     foreach (static::getPages() as $name => $page) {
