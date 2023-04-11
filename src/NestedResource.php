@@ -6,6 +6,7 @@ use Closure;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Routing\Exceptions\UrlGenerationException;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
@@ -30,17 +31,19 @@ abstract class NestedResource extends Resource
 
     public static function getParentId(): int|string|null
     {
-        return Route::current()->parameter(static::getParentAccessor(), Route::current()->parameter('record'));
+        $parentId = Route::current()->parameter(static::getParentAccessor(), Route::current()->parameter('record'));
+
+        return $parentId instanceof Model ? $parentId->getKey() : $parentId;
     }
 
     public static function getEloquentQuery(string|int|null $parent = null): Builder
     {
         $query = parent::getEloquentQuery();
         $parentModel = static::getParent()::getModel();
-        $key = (new $parentModel)->getKeyName();
+        $key = (new $parentModel())->getKeyName();
         $query->whereHas(
             static::getParentAccessor(),
-            fn (Builder $builder) => $builder->where($key, '=', $parent ?? static::getParentId())
+            fn(Builder $builder) => $builder->where($key, '=', $parent ?? static::getParentId())
         );
 
         return $query;
@@ -53,11 +56,11 @@ abstract class NestedResource extends Resource
 
             $prefix = '';
             foreach (static::getParentTree(static::getParent()) as $parent) {
-                $prefix .= $parent->urlPart.'/{'.$parent->urlPlaceholder.'}/';
+                $prefix .= $parent->urlPart . '/{' . $parent->urlPlaceholder . '}/';
             }
 
             Route::name("$slug.")
-                ->prefix($prefix.$slug)
+                ->prefix($prefix . $slug)
                 ->middleware(static::getMiddlewares())
                 ->group(function () {
                     foreach (static::getPages() as $name => $page) {
@@ -69,6 +72,10 @@ abstract class NestedResource extends Resource
 
     public static function getUrl($name = 'index', $params = [], $isAbsolute = true): string
     {
+        if (! is_array($params)) {
+            $params = [$params];
+        }
+
         $list = static::getParentParametersForUrl(static::getParent(), $params);
 
         $params = [...$params, ...$list];
@@ -103,15 +110,21 @@ abstract class NestedResource extends Resource
 
         $urlParams = static::getParentParametersForUrl($parent, $urlParams);
 
+        $id = Route::current()?->parameter(
+            $singularSlug,
+            $urlParams[$singularSlug] ?? null
+        );
+
+        if ($id instanceof Model) {
+            $id = $id->getKey();
+        }
+
         $list[$parent::getSlug()] = new NestedEntry(
             urlPlaceholder: Str::camel(Str::singular($parent::getSlug())),
             urlPart: $parent::getSlug(),
             resource: $parent,
             label: $parent::getPluralModelLabel(),
-            id: Route::current()?->parameter(
-                $singularSlug,
-                $urlParams[$singularSlug] ?? null
-            ),
+            id: $id,
             urlParams: $urlParams
         );
 
@@ -130,6 +143,12 @@ abstract class NestedResource extends Resource
             $singularSlug,
             $urlParameters[$singularSlug] ?? null
         );
+
+        foreach ($list as $key => $value) {
+            if ($value instanceof Model) {
+                $list[$key] = $value->getKey();
+            }
+        }
 
         return $list;
     }

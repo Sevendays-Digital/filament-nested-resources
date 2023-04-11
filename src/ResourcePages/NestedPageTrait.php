@@ -3,7 +3,9 @@
 namespace SevendaysDigital\FilamentNestedResources\ResourcePages;
 
 use Filament\Resources\Resource;
+use Illuminate\Database\Eloquent\Model;
 use SevendaysDigital\FilamentNestedResources\NestedResource;
+use Illuminate\Support\Str;
 
 trait NestedPageTrait
 {
@@ -48,5 +50,23 @@ trait NestedPageTrait
         }
 
         return $resource::getUrl('index', $this->urlParameters);
+    }
+
+    protected function getParentId(): string|int
+    {
+        /** @var NestedResource $resource */
+        $resource = $this::getResource();
+
+        $parent = Str::camel(Str::afterLast($resource::getParent()::getModel(), '\\'));
+
+        if ($this->urlParameters[$parent] instanceof Model) {
+            return $this->urlParameters[$parent]->getKey();
+        }
+
+        if (is_array($this->urlParameters[$parent]) && isset($this->urlParameters[$parent]['id'])) {
+            return $this->urlParameters[$parent]['id'];
+        }
+
+        return $this->urlParameters[$parent];
     }
 }

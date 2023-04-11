@@ -17,6 +17,13 @@ abstract class NestedCreateRecord extends CreateRecord
     public function mount(): void
     {
         $this->urlParameters = Route::current()->parameters;
+
+        foreach ($this->urlParameters as $key => $value) {
+            if ($value instanceof Model) {
+                $this->urlParameters[$key] = $value->getKey();
+            }
+        }
+
         parent::mount();
     }
 
@@ -29,7 +36,7 @@ abstract class NestedCreateRecord extends CreateRecord
 
         // Create the model.
         $model = $this->getModel()::make($data);
-        $model->{$parent}()->associate($this->urlParameters[$parent]);
+        $model->{$parent}()->associate($this->getParentId());
         $model->save();
 
         return $model;
