@@ -59,6 +59,18 @@ public static function table(Table $table): Table
 }
 ```
 
+### Accessing the parent
+
+When you need the parent in livewire context such as the form or tables you can use the $livewire in the closure to
+access it:
+
+```php
+TextInput::make('price')
+    ->label(__('price'))
+    ->suffix(fn($livewire) => $livewire->getParent()->currency)
+    ->integer()
+```
+
 ### Sidebar
 
 By default when in a "context" the sidebar will register the menu item for that resource.

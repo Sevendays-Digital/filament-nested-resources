@@ -69,4 +69,11 @@ trait NestedPageTrait
 
         return $this->urlParameters[$parent];
     }
+
+    public function getParent(): Model
+    {
+        $resource = $this::getResource();
+
+        return $resource::getParent()::getModel()::find($this->getParentId());
+    }
 }
