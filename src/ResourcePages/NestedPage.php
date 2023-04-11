@@ -2,8 +2,11 @@
 
 namespace SevendaysDigital\FilamentNestedResources\ResourcePages;
 
+use Filament\Pages\Actions\CreateAction;
 use Filament\Resources\Form;
 use Filament\Resources\Resource;
+use Filament\Tables\Actions\EditAction;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
@@ -22,7 +25,9 @@ trait NestedPage
 
     public function mountNestedPage()
     {
-        $this->urlParameters = $this->getUrlParametersForState();
+        if (empty($this->urlParameters)) {
+            $this->urlParameters = $this->getUrlParametersForState();
+        }
     }
 
     protected function getUrlParametersForState(): array
@@ -64,6 +69,60 @@ trait NestedPage
         }
 
         return $nestedCrumbs;
+    }
+
+    protected function handleRecordCreation(array $data): Model
+    {
+        /** @var NestedResource $resource */
+        $resource = $this::getResource();
+
+        $parent = Str::camel(Str::afterLast($resource::getParent()::getModel(), '\\'));
+
+        // Create the model.
+        $model = $this->getModel()::make($data);
+        $model->{$parent}()->associate($this->getParentId());
+        $model->save();
+
+        return $model;
+    }
+
+    protected function getTableQuery(): Builder
+    {
+        $urlParams = array_values($this->urlParameters);
+        $parameter = array_pop($urlParams);
+
+        return static::getResource()::getEloquentQuery($parameter);
+    }
+
+    protected function configureEditAction(\Filament\Pages\Actions\EditAction|EditAction $action): void
+    {
+        $resource = static::getResource();
+
+        $action
+            ->authorize(fn (Model $record): bool => $resource::canEdit($record))
+            ->form(fn (): array => $this->getEditFormSchema());
+
+        if ($resource::hasPage('edit')) {
+            $action->url(fn (Model $record): string => $resource::getUrl(
+                'edit',
+                [...$this->urlParameters, 'record' => $record]
+            ));
+        }
+    }
+
+    protected function configureCreateAction(CreateAction $action): void
+    {
+        $resource = static::getResource();
+
+        $action
+            ->authorize($resource::canCreate())
+            ->model($this->getModel())
+            ->modelLabel($this->getModelLabel())
+            ->form(fn (): array => $this->getCreateFormSchema());
+
+        if ($resource::hasPage('create')) {
+            $action->url(fn (): string => $resource::getUrl('create', $this->urlParameters));
+        }
     }
 
     protected function getRedirectUrl(): string
