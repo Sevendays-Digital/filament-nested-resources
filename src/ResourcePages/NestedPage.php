@@ -5,11 +5,39 @@ namespace SevendaysDigital\FilamentNestedResources\ResourcePages;
 use Filament\Resources\Form;
 use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 use SevendaysDigital\FilamentNestedResources\NestedResource;
 
-trait NestedPageTrait
+trait NestedPage
 {
+    public array $urlParameters;
+
+    public function bootNestedPage()
+    {
+        if (empty($this->urlParameters)) {
+            $this->urlParameters = $this->getUrlParametersForState();
+        }
+    }
+
+    public function mountNestedPage()
+    {
+        $this->urlParameters = $this->getUrlParametersForState();
+    }
+
+    protected function getUrlParametersForState(): array
+    {
+        $parameters = Route::current()->parameters;
+
+        foreach ($parameters as $key => $value) {
+            if ($value instanceof Model) {
+                $parameters[$key] = $value->getKey();
+            }
+        }
+
+        return $parameters;
+    }
+
     protected function getBreadcrumbs(): array
     {
         /** @var resource|NestedResource $resource */

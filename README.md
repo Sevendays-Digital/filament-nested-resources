@@ -39,13 +39,10 @@ class ChildModelResource extends NestedResource
 }
 ```
 
-Then for each of the following, update it to use the nested version:
-- `CreateChildModel extends CreateRecord` -> `CreateChildModel extends NestedCreateRecord`
-- `EditChildModel extends EditRecord` -> `EditChildModel extends NestedEditRecord`
-- `ListChildModel extends ListRecords` -> `CreateChildModel extends NestedListRecords`
-
-This is required because in our filament component we need to keep track of the context. I hope some day we can have
-utility in Filament to avoid this change.
+Then for each of the resource pages, you need to add the trait:
+```php
+use SevendaysDigital\FilamentNestedResources\ResourcePages\NestedPage;
+```
 
 Finally, on your `ParentModelResource` you can add the column to provide the links:
 
