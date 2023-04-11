@@ -13,6 +13,7 @@ use Illuminate\Support\Str;
 abstract class NestedResource extends Resource
 {
     protected static bool $shouldRegisterNavigation = false;
+
     protected static bool $shouldRegisterNavigationWhenInContext = true;
 
     /**
@@ -39,7 +40,7 @@ abstract class NestedResource extends Resource
         $key = (new $parentModel)->getKeyName();
         $query->whereHas(
             static::getParentAccessor(),
-            fn(Builder $builder) => $builder->where($key, '=', $parent ?? static::getParentId())
+            fn (Builder $builder) => $builder->where($key, '=', $parent ?? static::getParentId())
         );
 
         return $query;
@@ -52,11 +53,11 @@ abstract class NestedResource extends Resource
 
             $prefix = '';
             foreach (static::getParentTree(static::getParent()) as $parent) {
-                $prefix .= $parent->urlPart . '/{' . $parent->urlPlaceholder . '}/';
+                $prefix .= $parent->urlPart.'/{'.$parent->urlPlaceholder.'}/';
             }
 
             Route::name("$slug.")
-                ->prefix($prefix . $slug)
+                ->prefix($prefix.$slug)
                 ->middleware(static::getMiddlewares())
                 ->group(function () {
                     foreach (static::getPages() as $name => $page) {
@@ -72,14 +73,13 @@ abstract class NestedResource extends Resource
 
         $params = [...$params, ...$list];
 
-
         // Attempt to figure out what url binding should be set for the record.
         $childParams = Route::current()->parameters();
 
         if (isset($childParams['record'])) {
             /** @var Page $controller */
             $controller = Route::current()->getController();
-            /** @var Resource $resource */
+            /** @var resource $resource */
             $resource = $controller::getResource();
 
             $params[Str::singular($resource::getSlug())] = $childParams['record'];
@@ -152,6 +152,7 @@ abstract class NestedResource extends Resource
         if (static::$shouldRegisterNavigationWhenInContext) {
             try {
                 static::getUrl('index');
+
                 return true;
             } catch (UrlGenerationException) {
                 return false;
