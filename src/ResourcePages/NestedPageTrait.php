@@ -4,8 +4,8 @@ namespace SevendaysDigital\FilamentNestedResources\ResourcePages;
 
 use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Model;
-use SevendaysDigital\FilamentNestedResources\NestedResource;
 use Illuminate\Support\Str;
+use SevendaysDigital\FilamentNestedResources\NestedResource;
 
 trait NestedPageTrait
 {
