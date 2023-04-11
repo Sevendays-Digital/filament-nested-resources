@@ -59,6 +59,24 @@ public static function table(Table $table): Table
 }
 ```
 
+### Sidebar
+
+By default when in a "context" the sidebar will register the menu item for that resource.
+
+So if you are inside a Project which has documents, the sidebar will show documents when you are on a project or deeper
+level.
+
+If you do not want this, you can set `shouldRegisterNavigationWhenInContext` to false in the child resource.
+
+### Notes
+
+You cannot use a child resource for multiple parents, however, you can can have multiple resources pointing to the same
+model.
+
+Just make sure you set a custom slug for the resources so that it builds unique routes.
+
+https://filamentphp.com/docs/2.x/admin/resources/getting-started#customizing-the-url-slug
+
 ## Testing
 
 There's none :).

@@ -3,14 +3,17 @@
 namespace SevendaysDigital\FilamentNestedResources;
 
 use Closure;
+use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Routing\Exceptions\UrlGenerationException;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 
 abstract class NestedResource extends Resource
 {
     protected static bool $shouldRegisterNavigation = false;
+    protected static bool $shouldRegisterNavigationWhenInContext = true;
 
     /**
      * @return resource|NestedResource
@@ -24,9 +27,9 @@ abstract class NestedResource extends Resource
             ->camel();
     }
 
-    public static function getParentId(): int|string
+    public static function getParentId(): int|string|null
     {
-        return Route::current()->parameter(static::getParentAccessor());
+        return Route::current()->parameter(static::getParentAccessor(), Route::current()->parameter('record'));
     }
 
     public static function getEloquentQuery(string|int|null $parent = null): Builder
@@ -36,7 +39,7 @@ abstract class NestedResource extends Resource
         $key = (new $parentModel)->getKeyName();
         $query->whereHas(
             static::getParentAccessor(),
-            fn (Builder $builder) => $builder->where($key, '=', $parent ?? static::getParentId())
+            fn(Builder $builder) => $builder->where($key, '=', $parent ?? static::getParentId())
         );
 
         return $query;
@@ -49,11 +52,11 @@ abstract class NestedResource extends Resource
 
             $prefix = '';
             foreach (static::getParentTree(static::getParent()) as $parent) {
-                $prefix .= $parent->urlPart.'/{'.$parent->urlPlaceholder.'}/';
+                $prefix .= $parent->urlPart . '/{' . $parent->urlPlaceholder . '}/';
             }
 
             Route::name("$slug.")
-                ->prefix($prefix.$slug)
+                ->prefix($prefix . $slug)
                 ->middleware(static::getMiddlewares())
                 ->group(function () {
                     foreach (static::getPages() as $name => $page) {
@@ -69,7 +72,20 @@ abstract class NestedResource extends Resource
 
         $params = [...$params, ...$list];
 
-        return parent::getUrl($name, $params, $isAbsolute);
+
+        // Attempt to figure out what url binding should be set for the record.
+        $childParams = Route::current()->parameters();
+
+        if (isset($childParams['record'])) {
+            /** @var Page $controller */
+            $controller = Route::current()->getController();
+            /** @var Resource $resource */
+            $resource = $controller::getResource();
+
+            $params[Str::singular($resource::getSlug())] = $childParams['record'];
+        }
+
+        return parent::getUrl($name, [...$params, ...$childParams], $isAbsolute);
     }
 
     /**
@@ -116,5 +132,32 @@ abstract class NestedResource extends Resource
         );
 
         return $list;
+    }
+
+    protected static function getNavigationGroup(): ?string
+    {
+        if (static::getParentId()) {
+            return static::getParent()::getRecordTitle(
+                static::getParent()::getModel()::find(
+                    static::getParentId()
+                )
+            );
+        }
+
+        return static::getParent()::getModelLabel();
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        if (static::$shouldRegisterNavigationWhenInContext) {
+            try {
+                static::getUrl('index');
+                return true;
+            } catch (UrlGenerationException) {
+                return false;
+            }
+        }
+
+        return parent::shouldRegisterNavigation();
     }
 }

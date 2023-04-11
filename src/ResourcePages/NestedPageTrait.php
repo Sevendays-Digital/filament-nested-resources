@@ -20,8 +20,10 @@ trait NestedPageTrait
         }
 
         // Add the current list entry.
-        $currentListUrl = $resource::getUrl('index',
-            $resource::getParentParametersForUrl($resource::getParent(), $this->urlParameters));
+        $currentListUrl = $resource::getUrl(
+            'index',
+            $resource::getParentParametersForUrl($resource::getParent(), $this->urlParameters)
+        );
         $nestedCrumbs[$currentListUrl] = $resource::getBreadcrumb();
 
         // Finalize with the current url.
