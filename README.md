@@ -61,15 +61,13 @@ public static function table(Table $table): Table
 
 ### Accessing the parent
 
-When you need the parent in livewire context such as the form or tables you can use the $livewire in the closure to
-access it:
+When you need the parent in livewire context such as the form, you can add the second argument to your form method:
 
 ```php
-TextInput::make('price')
-    ->label(__('price'))
-    ->suffix(fn($livewire) => $livewire->getParent()->currency)
-    ->integer()
+public static function form(Form $form, ?Event $parent = null): Form;
 ```
+
+Where `Event` is the model that should be the parent.
 
 ### Sidebar
 

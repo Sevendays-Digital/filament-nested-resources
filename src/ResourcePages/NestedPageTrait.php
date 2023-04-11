@@ -2,6 +2,7 @@
 
 namespace SevendaysDigital\FilamentNestedResources\ResourcePages;
 
+use Filament\Resources\Form;
 use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Model;
 use SevendaysDigital\FilamentNestedResources\NestedResource;
@@ -75,5 +76,10 @@ trait NestedPageTrait
         $resource = $this::getResource();
 
         return $resource::getParent()::getModel()::find($this->getParentId());
+    }
+
+    protected function form(Form $form): Form
+    {
+        return static::getResource()::form($form, $this->getParent());
     }
 }
