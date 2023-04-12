@@ -18,7 +18,7 @@ abstract class NestedResource extends Resource
     protected static bool $shouldRegisterNavigationWhenInContext = true;
 
     /**
-     * @return Resource|NestedResource
+     * @return resource|NestedResource
      */
     abstract public static function getParent(): string;
 
