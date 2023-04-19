@@ -18,7 +18,7 @@ abstract class NestedResource extends Resource
     protected static bool $shouldRegisterNavigationWhenInContext = true;
 
     /**
-     * @return resource|NestedResource
+     * @return Resource|NestedResource
      */
     abstract public static function getParent(): string;
 
@@ -56,11 +56,11 @@ abstract class NestedResource extends Resource
 
             $prefix = '';
             foreach (static::getParentTree(static::getParent()) as $parent) {
-                $prefix .= $parent->urlPart.'/{'.$parent->urlPlaceholder.'}/';
+                $prefix .= $parent->urlPart . '/{' . $parent->urlPlaceholder . '}/';
             }
 
             Route::name("$slug.")
-                ->prefix($prefix.$slug)
+                ->prefix($prefix . $slug)
                 ->middleware(static::getMiddlewares())
                 ->group(function () {
                     foreach (static::getPages() as $name => $page) {
@@ -86,7 +86,7 @@ abstract class NestedResource extends Resource
         if (isset($childParams['record'])) {
             /** @var Page $controller */
             $controller = Route::current()->getController();
-            /** @var resource $resource */
+            /** @var Resource $resource */
             $resource = $controller::getResource();
 
             $params[Str::singular($resource::getSlug())] = $childParams['record'];

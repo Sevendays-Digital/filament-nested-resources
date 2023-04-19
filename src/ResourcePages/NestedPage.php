@@ -3,8 +3,9 @@
 namespace SevendaysDigital\FilamentNestedResources\ResourcePages;
 
 use Filament\Pages\Actions\CreateAction;
+use Filament\Pages\Actions\DeleteAction;
 use Filament\Resources\Form;
-use Filament\Resources\Resource;
+use Filament\Tables\Actions\DeleteAction as FilamentDeleteAction;
 use Filament\Tables\Actions\EditAction;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -12,9 +13,17 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 use SevendaysDigital\FilamentNestedResources\NestedResource;
 
+/**
+ * @mixin Filament\Resources\Pages\EditRecord
+ */
 trait NestedPage
 {
     public array $urlParameters;
+
+    /**
+     * @return class-string<NestedResource>|NestedResource
+     */
+    abstract public static function getResource(): string;
 
     public function bootNestedPage()
     {
@@ -45,7 +54,6 @@ trait NestedPage
 
     protected function getBreadcrumbs(): array
     {
-        /** @var resource|NestedResource $resource */
         $resource = static::getResource();
 
         // Build the nested breadcrumbs.
@@ -138,6 +146,17 @@ trait NestedPage
         if ($resource::hasPage('create')) {
             $action->url(fn (): string => $resource::getUrl('create', $this->urlParameters));
         }
+    }
+
+    protected function configureDeleteAction(DeleteAction|FilamentDeleteAction $action): void
+    {
+        $resource = static::getResource();
+
+        $action
+            ->authorize($resource::canDelete($this->getRecord()))
+            ->record($this->getRecord())
+            ->recordTitle($this->getRecordTitle())
+            ->successRedirectUrl($resource::getUrl('index', $this->urlParameters));
     }
 
     protected function getRedirectUrl(): string
