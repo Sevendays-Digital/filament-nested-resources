@@ -58,7 +58,6 @@ class ChildResourceLink extends TextColumn
 
         $param = Str::camel(Str::singular($this->resourceClass::getParent()::getSlug()));
 
-
         return $this->resourceClass::getUrl(
             'index',
             [...$baseParams, $param->value() => $this->record->getKey()]
