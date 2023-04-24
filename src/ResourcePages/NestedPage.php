@@ -4,7 +4,9 @@ namespace SevendaysDigital\FilamentNestedResources\ResourcePages;
 
 use Filament\Pages\Actions\CreateAction;
 use Filament\Pages\Actions\DeleteAction;
+use Filament\Pages\Actions\EditAction as PageEditAction;
 use Filament\Resources\Form;
+use Filament\Resources\Pages\ViewRecord;
 use Filament\Tables\Actions\DeleteAction as FilamentDeleteAction;
 use Filament\Tables\Actions\EditAction;
 use Illuminate\Database\Eloquent\Builder;
@@ -21,18 +23,18 @@ trait NestedPage
     public array $urlParameters;
 
     /**
-     * @return class-string<NestedResource>|NestedResource
+     * @return class-string<NestedResource>
      */
     abstract public static function getResource(): string;
 
-    public function bootNestedPage()
+    public function bootNestedPage(): void
     {
         if (empty($this->urlParameters)) {
             $this->urlParameters = $this->getUrlParametersForState();
         }
     }
 
-    public function mountNestedPage()
+    public function mountNestedPage(): void
     {
         if (empty($this->urlParameters)) {
             $this->urlParameters = $this->getUrlParametersForState();
@@ -70,6 +72,11 @@ trait NestedPage
         );
         $nestedCrumbs[$currentListUrl] = $resource::getBreadcrumb();
 
+        // If it is a view page we need to add the current entry.
+        if ($this instanceof ViewRecord) {
+            $nestedCrumbs[$resource::getUrl('edit', $this->urlParameters)] = $this->getTitle();
+        }
+
         // Finalize with the current url.
         $breadcrumb = $this->getBreadcrumb();
         if (filled($breadcrumb)) {
@@ -102,7 +109,7 @@ trait NestedPage
         return static::getResource()::getEloquentQuery($parameter);
     }
 
-    protected function configureEditAction(\Filament\Pages\Actions\EditAction|EditAction $action): void
+    protected function configureEditAction(PageEditAction|EditAction $action): void
     {
         $resource = static::getResource();
 
@@ -124,7 +131,10 @@ trait NestedPage
                 ->recordTitle($this->getRecordTitle());
 
             if ($resource::hasPage('edit')) {
-                $action->url(fn (): string => static::getResource()::getUrl('edit', ['record' => $this->getRecord()]));
+                $action->url(fn (): string => static::getResource()::getUrl(
+                    'edit',
+                    [...$this->urlParameters, 'record' => $this->getRecord()]
+                ));
 
                 return;
             }
