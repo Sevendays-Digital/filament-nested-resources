@@ -46,7 +46,7 @@ class ChildResourceLink extends TextColumn
     {
         $count = $this->getCount();
 
-        return $count . ' ' . ($count === 1 ? $this->getChildLabelSingular() : $this->getChildLabelPlural());
+        return $count.' '.($count === 1 ? $this->getChildLabelSingular() : $this->getChildLabelPlural());
     }
 
     public function getUrl(): ?string
