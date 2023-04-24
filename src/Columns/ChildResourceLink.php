@@ -46,7 +46,7 @@ class ChildResourceLink extends TextColumn
     {
         $count = $this->getCount();
 
-        return $count.' '.($count === 1 ? $this->getChildLabelSingular() : $this->getChildLabelPlural());
+        return $count . ' ' . ($count === 1 ? $this->getChildLabelSingular() : $this->getChildLabelPlural());
     }
 
     public function getUrl(): ?string
@@ -60,7 +60,7 @@ class ChildResourceLink extends TextColumn
 
         return $this->resourceClass::getUrl(
             'index',
-            [...$baseParams, $param->value() => $this->record->getKey()]
+            [...$baseParams, $param => $this->record->getKey()]
         );
     }
 
