@@ -60,21 +60,41 @@ trait NestedPage
 
         // Build the nested breadcrumbs.
         $nestedCrumbs = [];
-        foreach ($resource::getParentTree(static::getResource()::getParent(), $this->urlParameters) as $nested) {
-            $nestedCrumbs[$nested->getListUrl()] = $nested->resource::getBreadcrumb();
-            $nestedCrumbs[$nested->getEditUrl()] = $nested->getBreadcrumbTitle();
+        foreach ($resource::getParentTree(static::getResource()::getParent(), $this->urlParameters) as $i => $nested) {
+            // Here we check if we can view and/or edit a record, if not we replace the link with a #.
+            // List.
+            if ($nested->resource::canViewAny()) {
+                $nestedCrumbs[$nested->getListUrl()] = $nested->resource::getBreadcrumb();
+            } else {
+                $nestedCrumbs[] = $nested->resource::getBreadcrumb();
+            }
+
+            // Edit.
+            if ($nested->resource::canEdit($nested->getRecord())) {
+                $nestedCrumbs[$nested->getEditUrl()] = $nested->getBreadcrumbTitle();
+            } else {
+                $nestedCrumbs[] = $nested->getBreadcrumbTitle();
+            }
         }
 
         // Add the current list entry.
-        $currentListUrl = $resource::getUrl(
-            'index',
-            $resource::getParentParametersForUrl($resource::getParent(), $this->urlParameters)
-        );
-        $nestedCrumbs[$currentListUrl] = $resource::getBreadcrumb();
+        if ($resource::canViewAny()) {
+            $currentListUrl = $resource::getUrl(
+                'index',
+                $resource::getParentParametersForUrl($resource::getParent(), $this->urlParameters)
+            );
+            $nestedCrumbs[$currentListUrl] = $resource::getBreadcrumb();
+        } else {
+            $nestedCrumbs[] = $resource::getBreadcrumb();
+        }
 
         // If it is a view page we need to add the current entry.
         if ($this instanceof ViewRecord) {
-            $nestedCrumbs[$resource::getUrl('edit', $this->urlParameters)] = $this->getTitle();
+            if ($resource::canEdit($this->record)) {
+                $nestedCrumbs[$resource::getUrl('edit', $this->urlParameters)] = $this->getTitle();
+            } else {
+                $nestedCrumbs[] = $this->getTitle();
+            }
         }
 
         // Finalize with the current url.
