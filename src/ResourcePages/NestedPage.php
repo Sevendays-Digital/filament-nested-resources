@@ -5,10 +5,12 @@ namespace SevendaysDigital\FilamentNestedResources\ResourcePages;
 use Filament\Pages\Actions\CreateAction;
 use Filament\Pages\Actions\DeleteAction;
 use Filament\Pages\Actions\EditAction as PageEditAction;
+use Filament\Pages\Actions\ViewAction;
 use Filament\Resources\Form;
 use Filament\Resources\Pages\ViewRecord;
-use Filament\Tables\Actions\DeleteAction as FilamentDeleteAction;
+use Filament\Tables\Actions\DeleteAction as TableDeleteAction;
 use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\ViewAction as TableViewAction;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Route;
@@ -16,14 +18,16 @@ use Illuminate\Support\Str;
 use SevendaysDigital\FilamentNestedResources\NestedResource;
 
 /**
- * @mixin Filament\Resources\Pages\EditRecord
+ * @extends \Filament\Resources\Pages\EditRecord
+ * @extends \Filament\Resources\Pages\ViewRecord
+ * @extends \Filament\Resources\Pages\ListRecords
  */
 trait NestedPage
 {
     public array $urlParameters;
 
     /**
-     * @return class-string<NestedResource>
+     * @return class-string<\SevendaysDigital\FilamentNestedResources\NestedResource>
      */
     abstract public static function getResource(): string;
 
@@ -70,7 +74,7 @@ trait NestedPage
             }
 
             // Edit.
-            if ($nested->resource::canEdit($nested->getRecord())) {
+            if (($record = $nested->getRecord()) && $nested->resource::canEdit($record)) {
                 $nestedCrumbs[$nested->getEditUrl()] = $nested->getBreadcrumbTitle();
             } else {
                 $nestedCrumbs[] = $nested->getBreadcrumbTitle();
@@ -178,7 +182,7 @@ trait NestedPage
         }
     }
 
-    protected function configureDeleteAction(DeleteAction|FilamentDeleteAction $action): void
+    protected function configureDeleteAction(DeleteAction|TableDeleteAction $action): void
     {
         $resource = static::getResource();
 
@@ -187,6 +191,34 @@ trait NestedPage
             ->record($this->getRecord())
             ->recordTitle($this->getRecordTitle())
             ->successRedirectUrl($resource::getUrl('index', $this->urlParameters));
+    }
+
+    protected function configureViewAction(ViewAction|TableViewAction $action): void
+    {
+        $resource = static::getResource();
+
+        if ($action instanceof TableViewAction) {
+            $action
+                ->authorize(fn (Model $record): bool => $resource::canView($record))
+                ->form(fn (): array => $this->getViewFormSchema());
+
+            if ($resource::hasPage('view')) {
+                $action->url(fn (Model $record): string => $resource::getUrl('view', ['record' => $record]));
+            }
+        } else {
+            $action
+                ->authorize($resource::canView($this->getRecord()))
+                ->record($this->getRecord())
+                ->recordTitle($this->getRecordTitle());
+
+            if ($resource::hasPage('view')) {
+                $action->url(fn (): string => static::getResource()::getUrl('view', [...$this->urlParameters, 'record' => $this->getRecord()]));
+
+                return;
+            }
+
+            $action->form($this->getFormSchema());
+        }
     }
 
     protected function getRedirectUrl(): string
