@@ -10,7 +10,7 @@ class NestedEntry
     public function __construct(
         public string $urlPlaceholder,
         public string $urlPart,
-        /** @var class-string<Resource> $resource */
+        /** @var class-string<resource> $resource */
         public string $resource,
         public string $label,
         public null|string|int $id,
@@ -34,7 +34,8 @@ class NestedEntry
         return $this->resource::getUrl('edit', [...$params, 'record' => $this->id()]);
     }
 
-    public function getRecord(): Model {
+    public function getRecord(): Model
+    {
         return $this->resource::resolveRecordRouteBinding($this->id);
     }
 
