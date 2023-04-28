@@ -2,6 +2,7 @@
 
 namespace SevendaysDigital\FilamentNestedResources\ResourcePages;
 
+use Closure;
 use Filament\Pages\Actions\CreateAction;
 use Filament\Pages\Actions\DeleteAction;
 use Filament\Pages\Actions\EditAction as PageEditAction;
@@ -264,5 +265,48 @@ trait NestedPage
     protected function form(Form $form): Form
     {
         return static::getResource()::form($form, $this->getParent());
+    }
+
+    protected function getTableRecordUrlUsing(): ?Closure
+    {
+        return function (Model $record): ?string {
+            foreach (['view', 'edit'] as $action) {
+                $action = $this->getCachedTableAction($action);
+
+                if (! $action) {
+                    continue;
+                }
+
+                $action->record($record);
+
+                if ($action->isHidden()) {
+                    continue;
+                }
+
+                $url = $action->getUrl();
+
+                if (! $url) {
+                    continue;
+                }
+
+                return $url;
+            }
+
+            $resource = static::getResource();
+
+            foreach (['view', 'edit'] as $action) {
+                if (! $resource::hasPage($action)) {
+                    continue;
+                }
+
+                if (! $resource::{'can' . ucfirst($action)}($record)) {
+                    continue;
+                }
+
+                return $resource::getUrl($action, [...$this->urlParameters, 'record' => $record]);
+            }
+
+            return null;
+        };
     }
 }
