@@ -299,7 +299,7 @@ trait NestedPage
                     continue;
                 }
 
-                if (! $resource::{'can' . ucfirst($action)}($record)) {
+                if (! $resource::{'can'.ucfirst($action)}($record)) {
                     continue;
                 }
 
