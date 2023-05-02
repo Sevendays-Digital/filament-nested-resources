@@ -204,7 +204,7 @@ trait NestedPage
                 ->form(fn (): array => $this->getViewFormSchema());
 
             if ($resource::hasPage('view')) {
-                $action->url(fn (Model $record): string => $resource::getUrl('view', ['record' => $record]));
+                $action->url(fn (Model $record): string => $resource::getUrl('view', [...$this->urlParameters, 'record' => $record]));
             }
         } else {
             $action
