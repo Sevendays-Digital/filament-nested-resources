@@ -92,7 +92,7 @@ abstract class NestedResource extends Resource
             $params[Str::singular($resource::getSlug())] = $childParams['record'];
         }
 
-        return parent::getUrl($name, [...$params, ...$childParams], $isAbsolute);
+        return parent::getUrl($name, [...$childParams, ...$params], $isAbsolute);
     }
 
     /**
