@@ -96,7 +96,7 @@ trait NestedPage
         // If it is a view page we need to add the current entry.
         if ($this instanceof ViewRecord) {
             if ($resource::canEdit($this->record)) {
-                $nestedCrumbs[$resource::getUrl('edit', $this->urlParameters)] = $this->getTitle();
+                $nestedCrumbs[$resource::getUrl('edit', $this->urlParameters)] = $this->getRecordTitle();
             } else {
                 $nestedCrumbs[] = $this->getTitle();
             }
