@@ -116,7 +116,7 @@ trait NestedPage
         /** @var NestedResource $resource */
         $resource = $this::getResource();
 
-        $parent = Str::camel(Str::afterLast($resource::getParent()::getModel(), '\\'));
+        $parent = $resource::getParentAccessor();
 
         // Create the model.
         $model = $this->getModel()::make($data);
